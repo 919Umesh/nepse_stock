@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Welcome header
           _buildWelcomeHeader(),
-          const Divider(height: 1),
+          const SizedBox(height: 8),
 
           // Portfolio summary
           _buildPortfolioSummary(),
