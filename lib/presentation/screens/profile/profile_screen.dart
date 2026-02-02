@@ -22,6 +22,13 @@ class ProfileScreen extends StatelessWidget {
           if (state is Unauthenticated) {
             context.go(RouteConstants.login);
           }
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+          if (state is Authenticated) {
+            // Show success message when profile is updated
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated')));
+          }
         },
         builder: (context, state) {
           if (state is Authenticated) {
@@ -82,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
                   leading: const Icon(Icons.person_outline),
                   title: const Text('Edit Profile'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                  onTap: () => _showEditProfileDialog(context, user),
                 ),
                 ListTile(
                   leading: const Icon(Icons.history),
@@ -155,6 +162,112 @@ class ProfileScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         },
       ),
+    );
+  }
+
+  void _showEditProfileDialog(BuildContext context, user) {
+    final formKey = GlobalKey<FormState>();
+    final fullNameCtrl = TextEditingController(text: user.fullName);
+    final phoneCtrl = TextEditingController(text: user.phone ?? '');
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: BlocConsumer<AuthBloc, AuthState>(
+            listener: (dialogCtx, state) {
+              if (state is Authenticated) {
+                Navigator.of(dialogCtx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated')));
+              }
+            },
+            builder: (dialogCtx, state) {
+              final isLoading = state is AuthLoading;
+              String? errorMsg;
+              if (state is AuthError) errorMsg = state.message;
+
+              return SizedBox(
+                width: 360,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundColor: AppColors.primaryGreen.withOpacity(0.12),
+                            child: Text(
+                              user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?',
+                              style: AppTextStyles.h3.copyWith(color: AppColors.primaryGreen),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Edit Profile', style: AppTextStyles.h3),
+                                const SizedBox(height: 4),
+                                Text(user.email, style: AppTextStyles.companyName),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: fullNameCtrl,
+                        decoration: const InputDecoration(labelText: 'Full name'),
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter full name' : null,
+                        enabled: !isLoading,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: phoneCtrl,
+                        decoration: const InputDecoration(labelText: 'Phone'),
+                        keyboardType: TextInputType.phone,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter phone' : null,
+                        enabled: !isLoading,
+                      ),
+                      if (errorMsg != null) ...[
+                        const SizedBox(height: 10),
+                        Text(errorMsg, style: AppTextStyles.bodySmall.copyWith(color: AppColors.errorRed)),
+                      ],
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: isLoading
+                                ? null
+                                : () {
+                                    if (!formKey.currentState!.validate()) return;
+                                    context.read<AuthBloc>().add(AuthProfileUpdateRequested(
+                                          fullName: fullNameCtrl.text.trim(),
+                                          phone: phoneCtrl.text.trim(),
+                                        ));
+                                  },
+                            child: isLoading
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Text('Save'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
