@@ -11,6 +11,7 @@ import '../screens/trading/buy_screen.dart';
 import '../screens/trading/sell_screen.dart';
 import '../screens/portfolio/portfolio_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/trading/transactions_screen.dart';
 
 import '../screens/main_wrapper.dart';
 import '../screens/stock/markets_screen.dart';
@@ -136,6 +137,12 @@ class AppRouter {
         parentNavigatorKey: _rootNavigatorKey,
         path: RouteConstants.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      // Transactions
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: RouteConstants.transactions,
+        builder: (context, state) => const TransactionsScreen(),
       ),
     ],
   );

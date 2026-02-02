@@ -36,6 +36,9 @@ class ApiConstants {
   static const String transactions = '/trading/transactions';
   
   // Timeouts
-  static const Duration connectTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  // Timeouts
+  // Use a shorter connect timeout and a longer receive timeout to allow
+  // slower server responses while failing fast on connection issues.
+  static const Duration connectTimeout = Duration(seconds: 15);
+  static const Duration receiveTimeout = Duration(seconds: 60);
 }

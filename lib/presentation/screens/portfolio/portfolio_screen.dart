@@ -8,7 +8,6 @@ import '../../../business_logic/portfolio/portfolio_state.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/constants/app_constants.dart';
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
